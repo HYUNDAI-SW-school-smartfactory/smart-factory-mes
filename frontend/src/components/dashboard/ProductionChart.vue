@@ -82,10 +82,12 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { productionTrend } from '@/lib/mes-data'
 import BaseCard from './BaseCard.vue'
 
-const maxValue = Math.max(...productionTrend.map((item) => Math.max(item.production, item.target)))
+const props = defineProps({
+  points: { type: Array, default: () => [] },
+})
+
 const minX = 72
 const maxX = 716
 const minY = 24
@@ -95,10 +97,27 @@ const tooltipRef = ref(null)
 const hoveredPoint = ref(null)
 const tooltipPosition = ref({ x: 0, y: 0 })
 
+const safePoints = computed(() => {
+  if (props.points.length > 0) {
+    return props.points
+  }
+
+  return [
+    { time: '00:00', production: 0, target: 0 },
+    { time: '01:00', production: 0, target: 0 },
+  ]
+})
+
+const maxValue = computed(() => {
+  const value = Math.max(...safePoints.value.map((item) => Math.max(item.production, item.target)))
+  return value > 0 ? value : 1
+})
+
 const chartPoints = computed(() => {
-  const basePoints = productionTrend.map((point, index) => {
-    const x = minX + ((maxX - minX) / (productionTrend.length - 1)) * index
-    const mapY = (value) => maxY - ((value / maxValue) * (maxY - minY))
+  const basePoints = safePoints.value.map((point, index) => {
+    const denominator = Math.max(1, safePoints.value.length - 1)
+    const x = minX + ((maxX - minX) / denominator) * index
+    const mapY = (value) => maxY - ((value / maxValue.value) * (maxY - minY))
 
     return {
       ...point,
@@ -158,13 +177,11 @@ function setHoveredPoint(point, event) {
   hoveredPoint.value = point
 
   const svgElement = event.currentTarget.ownerSVGElement
-
   if (!svgElement) {
     return
   }
 
   const bounds = svgElement.getBoundingClientRect()
-
   tooltipPosition.value = {
     x: event.clientX - bounds.left,
     y: event.clientY - bounds.top,

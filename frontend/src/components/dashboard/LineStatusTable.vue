@@ -17,7 +17,7 @@
             <td><StatusBadge :status="line.status" size="sm" /></td>
             <td class="align-right">{{ line.production.toLocaleString() }}</td>
             <td class="align-right">{{ line.uptime }}%</td>
-            <td class="align-right">›</td>
+            <td class="align-right">Open</td>
           </tr>
         </tbody>
       </table>

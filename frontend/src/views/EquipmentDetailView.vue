@@ -2,7 +2,7 @@
   <main class="page-shell" v-if="item">
     <div class="page-container page-container--compact">
       <header class="detail-header">
-        <RouterLink class="icon-button icon-button--link" :to="`/line/${item.lineId}`">←</RouterLink>
+        <RouterLink class="icon-button icon-button--link" :to="`/line/${item.lineId}`">Back</RouterLink>
         <div class="detail-header__text">
           <div class="detail-header__row">
             <h1>{{ item.name }}</h1>
@@ -66,29 +66,57 @@
   </main>
   <main v-else class="page-shell page-shell--centered">
     <div class="page-container page-container--tiny">
-      <h1 class="not-found__title">Equipment not found</h1>
+      <h1 class="not-found__title">{{ errorMessage || 'Equipment not found' }}</h1>
       <RouterLink to="/" class="text-link">Return to dashboard</RouterLink>
     </div>
   </main>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AlarmList from '@/components/dashboard/AlarmList.vue'
 import BaseCard from '@/components/dashboard/BaseCard.vue'
 import KpiCard from '@/components/dashboard/KpiCard.vue'
 import StatusBadge from '@/components/dashboard/StatusBadge.vue'
-import { getAlarmsByEquipmentId, getEquipmentById } from '@/lib/mes-data'
+import { connectEquipmentStream } from '@/lib/mes-live'
 
 const route = useRoute()
+const item = ref(null)
+const equipmentAlarms = ref([])
+const errorMessage = ref('')
+let disconnect = () => {}
 
-const item = computed(() => getEquipmentById(route.params.id))
-const equipmentAlarms = computed(() => (item.value ? getAlarmsByEquipmentId(item.value.id) : []))
 const uptimeVariant = computed(() => {
   if (!item.value) return 'default'
   if (item.value.uptime >= 90) return 'success'
   if (item.value.uptime >= 70) return 'warning'
   return 'danger'
+})
+
+watch(
+  () => route.params.id,
+  (equipmentId) => {
+    disconnect()
+    item.value = null
+    equipmentAlarms.value = []
+    errorMessage.value = ''
+
+    disconnect = connectEquipmentStream(equipmentId, {
+      onData: (payload) => {
+        item.value = payload.item
+        equipmentAlarms.value = payload.alarms
+      },
+      onError: (error) => {
+        errorMessage.value = error.message
+        item.value = null
+      },
+    })
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(() => {
+  disconnect()
 })
 </script>

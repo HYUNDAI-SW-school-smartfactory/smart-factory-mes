@@ -31,7 +31,7 @@ const displayAlarms = computed(() => props.alarms.slice(0, props.maxItems))
 
 const severitySymbol = (severity) => {
   if (severity === 'critical') return '!'
-  if (severity === 'warning') return '▲'
+  if (severity === 'warning') return '*'
   return 'i'
 }
 </script>
