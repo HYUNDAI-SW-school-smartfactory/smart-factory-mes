@@ -1,4 +1,4 @@
-package com.smartfactory.mes.simulation.mapper;
+package com.smartfactory.mes.simulation.persistence.mapper;
 
 import com.smartfactory.mes.simulation.domain.EquipmentStatusHistory;
 import org.apache.ibatis.annotations.Insert;

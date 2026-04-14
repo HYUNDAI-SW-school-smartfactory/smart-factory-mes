@@ -1,4 +1,4 @@
-package com.smartfactory.mes.simulation.mapper;
+package com.smartfactory.mes.simulation.persistence.mapper;
 
 import com.smartfactory.mes.simulation.domain.Equipment;
 import org.apache.ibatis.annotations.Insert;

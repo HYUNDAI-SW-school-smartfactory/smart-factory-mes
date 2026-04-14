@@ -1,4 +1,4 @@
-package com.smartfactory.mes.simulation.dto;
+package com.smartfactory.mes.simulation.dto.dashboard;
 
 import java.time.LocalDateTime;
 import java.util.List;

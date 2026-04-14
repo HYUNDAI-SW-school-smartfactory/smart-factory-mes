@@ -1,7 +1,7 @@
 package com.smartfactory.mes.simulation.domain;
 
-import com.smartfactory.mes.simulation.domain.element.EquipmentStatus;
-import com.smartfactory.mes.simulation.domain.element.EquipmentType;
+import com.smartfactory.mes.simulation.domain.enums.EquipmentStatus;
+import com.smartfactory.mes.simulation.domain.enums.EquipmentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
