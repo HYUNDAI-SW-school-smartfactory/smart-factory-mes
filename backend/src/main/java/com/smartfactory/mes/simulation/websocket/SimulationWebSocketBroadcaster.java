@@ -3,7 +3,7 @@ package com.smartfactory.mes.simulation.websocket;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartfactory.mes.global.exception.BusinessException;
-import com.smartfactory.mes.simulation.service.SimulationQueryService;
+import com.smartfactory.mes.simulation.service.SimulationRealtimeSnapshotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ConditionalOnProperty(prefix = "spring.datasource", name = "url")
 public class SimulationWebSocketBroadcaster {
 
-    private final SimulationQueryService simulationQueryService;
+    private final SimulationRealtimeSnapshotService simulationRealtimeSnapshotService;
     private final ObjectMapper objectMapper;
 
     private final Set<WebSocketSession> dashboardSessions = ConcurrentHashMap.newKeySet();
@@ -60,7 +60,7 @@ public class SimulationWebSocketBroadcaster {
     }
 
     private void broadcastDashboard() {
-        String payload = serializeSuccess("dashboard", simulationQueryService.getDashboardSnapshot());
+        String payload = serializeSuccess("dashboard", simulationRealtimeSnapshotService.getDashboardSnapshot());
         broadcastToSessions(dashboardSessions, payload);
     }
 
@@ -68,7 +68,7 @@ public class SimulationWebSocketBroadcaster {
         for (Map.Entry<Long, Set<WebSocketSession>> entry : lineSessions.entrySet()) {
             Long lineId = entry.getKey();
             try {
-                String payload = serializeSuccess("line", simulationQueryService.getLineDetail(lineId));
+                String payload = serializeSuccess("line", simulationRealtimeSnapshotService.getLineDetail(lineId));
                 broadcastToSessions(entry.getValue(), payload);
             } catch (BusinessException e) {
                 String payload = serializeError("line", e.getErrorCode().getCode(), e.getMessage());
@@ -81,7 +81,7 @@ public class SimulationWebSocketBroadcaster {
         for (Map.Entry<Long, Set<WebSocketSession>> entry : equipmentSessions.entrySet()) {
             Long equipmentId = entry.getKey();
             try {
-                String payload = serializeSuccess("equipment", simulationQueryService.getEquipmentDetail(equipmentId));
+                String payload = serializeSuccess("equipment", simulationRealtimeSnapshotService.getEquipmentDetail(equipmentId));
                 broadcastToSessions(entry.getValue(), payload);
             } catch (BusinessException e) {
                 String payload = serializeError("equipment", e.getErrorCode().getCode(), e.getMessage());
@@ -91,12 +91,12 @@ public class SimulationWebSocketBroadcaster {
     }
 
     private void sendDashboard(WebSocketSession session) {
-        sendToSession(session, serializeSuccess("dashboard", simulationQueryService.getDashboardSnapshot()));
+        sendToSession(session, serializeSuccess("dashboard", simulationRealtimeSnapshotService.getDashboardSnapshot()));
     }
 
     private void sendLine(Long lineId, WebSocketSession session) {
         try {
-            sendToSession(session, serializeSuccess("line", simulationQueryService.getLineDetail(lineId)));
+            sendToSession(session, serializeSuccess("line", simulationRealtimeSnapshotService.getLineDetail(lineId)));
         } catch (BusinessException e) {
             sendToSession(session, serializeError("line", e.getErrorCode().getCode(), e.getMessage()));
             closeQuietly(session, CloseStatus.BAD_DATA);
@@ -105,7 +105,7 @@ public class SimulationWebSocketBroadcaster {
 
     private void sendEquipment(Long equipmentId, WebSocketSession session) {
         try {
-            sendToSession(session, serializeSuccess("equipment", simulationQueryService.getEquipmentDetail(equipmentId)));
+            sendToSession(session, serializeSuccess("equipment", simulationRealtimeSnapshotService.getEquipmentDetail(equipmentId)));
         } catch (BusinessException e) {
             sendToSession(session, serializeError("equipment", e.getErrorCode().getCode(), e.getMessage()));
             closeQuietly(session, CloseStatus.BAD_DATA);

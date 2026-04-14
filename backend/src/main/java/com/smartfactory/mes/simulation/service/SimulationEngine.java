@@ -179,9 +179,7 @@ public class SimulationEngine {
         if (state.getCurrentStatus() == EquipmentStatus.RUN) {
             int uph = Math.max(80, (int) Math.round(state.getBaseUph() * (0.92 + random.nextDouble() * 0.16)));
             double expectedUnits = uph / 720.0;
-            double totalUnits = state.getProductionCarry() + expectedUnits;
-            int productionCount = (int) Math.floor(totalUnits);
-            state.setProductionCarry(totalUnits - productionCount);
+            int productionCount = resolveProductionCountForTick(expectedUnits, random);
 
             int defectCount = 0;
             if (productionCount > 0 && random.nextDouble() < state.getDefectBias()) {
@@ -194,9 +192,7 @@ public class SimulationEngine {
 
         if (state.getCurrentStatus() == EquipmentStatus.IDLE) {
             int uph = Math.max(20, (int) Math.round(state.getBaseUph() * 0.18));
-            double totalUnits = state.getProductionCarry() + (uph / 720.0);
-            int productionCount = (int) Math.floor(totalUnits);
-            state.setProductionCarry(totalUnits - productionCount);
+            int productionCount = resolveProductionCountForTick(uph / 720.0, random);
             return new ProductionMetrics(productionCount, 0, decimal(25 + random.nextDouble() * 20), uph);
         }
 
@@ -280,6 +276,19 @@ public class SimulationEngine {
 
     private BigDecimal decimal(double value) {
         return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private int resolveProductionCountForTick(double expectedUnits, ThreadLocalRandom random) {
+        int wholeUnits = (int) Math.floor(expectedUnits);
+        double fractionalUnits = expectedUnits - wholeUnits;
+
+        // Stochastic rounding keeps the average production rate similar
+        // while making 5-second updates feel more alive on the dashboard.
+        if (random.nextDouble() < fractionalUnits) {
+            return wholeUnits + 1;
+        }
+
+        return wholeUnits;
     }
 
     private record ProductionMetrics(
