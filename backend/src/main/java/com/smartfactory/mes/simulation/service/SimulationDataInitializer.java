@@ -28,6 +28,7 @@ public class SimulationDataInitializer implements ApplicationRunner {
     private final SimulationProfileFactory simulationProfileFactory;
     private final SimulationStateStore simulationStateStore;
     private final SimulationEngine simulationEngine;
+    private final SimulationRealtimeSnapshotService simulationRealtimeSnapshotService;
     private final SimulationProperties simulationProperties;
 
     @Override
@@ -51,7 +52,13 @@ public class SimulationDataInitializer implements ApplicationRunner {
 
         if (simulationPersistenceService.countProductionRecords() == 0) {
             warmUpRecords();
+            simulationRealtimeSnapshotService.initializeFromDatabase();
+            simulationStateStore.markReady();
+            return;
         }
+
+        simulationRealtimeSnapshotService.initializeFromDatabase();
+        simulationStateStore.markReady();
     }
 
     private void warmUpRecords() {

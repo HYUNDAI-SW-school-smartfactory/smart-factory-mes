@@ -14,10 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SimulationStateStore {
 
     private final Map<Long, EquipmentRuntimeState> states = new ConcurrentHashMap<>();
+    private boolean ready;
 
     public synchronized void initialize(List<EquipmentRuntimeState> initialStates) {
         states.clear();
         initialStates.forEach(state -> states.put(state.getEquipmentId(), state));
+        ready = false;
     }
 
     public synchronized List<EquipmentRuntimeState> snapshot() {
@@ -35,5 +37,13 @@ public class SimulationStateStore {
 
     public synchronized boolean isEmpty() {
         return states.isEmpty();
+    }
+
+    public synchronized boolean isReady() {
+        return ready;
+    }
+
+    public synchronized void markReady() {
+        ready = true;
     }
 }
