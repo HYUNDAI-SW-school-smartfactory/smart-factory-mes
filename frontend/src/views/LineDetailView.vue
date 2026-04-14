@@ -2,7 +2,7 @@
   <main class="page-shell" v-if="line">
     <div class="page-container page-container--narrow">
       <header class="detail-header">
-        <RouterLink class="icon-button icon-button--link" to="/">←</RouterLink>
+        <RouterLink class="icon-button icon-button--link" to="/">Back</RouterLink>
         <div class="detail-header__text">
           <div class="detail-header__row">
             <h1>{{ line.name }}</h1>
@@ -32,28 +32,58 @@
   </main>
   <main v-else class="page-shell page-shell--centered">
     <div class="page-container page-container--tiny">
-      <h1 class="not-found__title">Line not found</h1>
+      <h1 class="not-found__title">{{ errorMessage || 'Line not found' }}</h1>
       <RouterLink to="/" class="text-link">Return to dashboard</RouterLink>
     </div>
   </main>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import AlarmList from '@/components/dashboard/AlarmList.vue'
 import EquipmentTable from '@/components/dashboard/EquipmentTable.vue'
 import KpiCard from '@/components/dashboard/KpiCard.vue'
 import StatusBadge from '@/components/dashboard/StatusBadge.vue'
-import { getAlarmsByLineId, getEquipmentByLineId, getLineById } from '@/lib/mes-data'
+import { connectLineStream } from '@/lib/mes-live'
 
 const route = useRoute()
+const line = ref(null)
+const lineEquipment = ref([])
+const lineAlarms = ref([])
+const errorMessage = ref('')
+let disconnect = () => {}
 
-const line = computed(() => getLineById(route.params.id))
-const lineEquipment = computed(() => (line.value ? getEquipmentByLineId(line.value.id) : []))
-const lineAlarms = computed(() => (line.value ? getAlarmsByLineId(line.value.id) : []))
 const achievementRate = computed(() => {
-  if (!line.value) return 0
+  if (!line.value || !line.value.targetProduction) return 0
   return Number(((line.value.production / line.value.targetProduction) * 100).toFixed(1))
+})
+
+watch(
+  () => route.params.id,
+  (lineId) => {
+    disconnect()
+    line.value = null
+    lineEquipment.value = []
+    lineAlarms.value = []
+    errorMessage.value = ''
+
+    disconnect = connectLineStream(lineId, {
+      onData: (payload) => {
+        line.value = payload.line
+        lineEquipment.value = payload.equipments
+        lineAlarms.value = payload.alarms
+      },
+      onError: (error) => {
+        errorMessage.value = error.message
+        line.value = null
+      },
+    })
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(() => {
+  disconnect()
 })
 </script>

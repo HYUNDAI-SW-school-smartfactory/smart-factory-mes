@@ -40,5 +40,8 @@ const props = defineProps({
   summary: { type: Object, required: true },
 })
 
-const runPercentage = computed(() => Math.round((props.summary.running / props.summary.total) * 100))
+const runPercentage = computed(() => {
+  if (!props.summary.total) return 0
+  return Math.round((props.summary.running / props.summary.total) * 100)
+})
 </script>
