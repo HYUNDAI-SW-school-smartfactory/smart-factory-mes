@@ -3,9 +3,9 @@ package com.smartfactory.mes.simulation.service;
 import com.smartfactory.mes.simulation.domain.AlarmHistory;
 import com.smartfactory.mes.simulation.domain.EquipmentRuntimeState;
 import com.smartfactory.mes.simulation.domain.ProductionRecord;
-import com.smartfactory.mes.simulation.domain.element.AlarmSeverity;
-import com.smartfactory.mes.simulation.domain.element.AlarmType;
-import com.smartfactory.mes.simulation.domain.element.EquipmentStatus;
+import com.smartfactory.mes.simulation.domain.enums.AlarmSeverity;
+import com.smartfactory.mes.simulation.domain.enums.AlarmType;
+import com.smartfactory.mes.simulation.domain.enums.EquipmentStatus;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

@@ -1,4 +1,4 @@
-package com.smartfactory.mes.simulation.domain.element;
+package com.smartfactory.mes.simulation.domain.enums;
 
 public enum AlarmType {
     STOP,

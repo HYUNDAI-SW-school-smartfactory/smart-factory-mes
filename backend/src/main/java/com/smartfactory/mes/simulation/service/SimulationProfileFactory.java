@@ -2,8 +2,8 @@ package com.smartfactory.mes.simulation.service;
 
 import com.smartfactory.mes.simulation.domain.Equipment;
 import com.smartfactory.mes.simulation.domain.EquipmentRuntimeState;
-import com.smartfactory.mes.simulation.domain.element.EquipmentStatus;
-import com.smartfactory.mes.simulation.domain.element.EquipmentType;
+import com.smartfactory.mes.simulation.domain.enums.EquipmentStatus;
+import com.smartfactory.mes.simulation.domain.enums.EquipmentType;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;

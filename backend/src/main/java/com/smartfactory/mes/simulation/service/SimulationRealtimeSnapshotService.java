@@ -2,9 +2,9 @@ package com.smartfactory.mes.simulation.service;
 
 import com.smartfactory.mes.global.exception.BusinessException;
 import com.smartfactory.mes.global.exception.ErrorCode;
-import com.smartfactory.mes.simulation.dto.DashboardResponseModels;
-import com.smartfactory.mes.simulation.dto.EquipmentResponseModels;
-import com.smartfactory.mes.simulation.dto.LineResponseModels;
+import com.smartfactory.mes.simulation.dto.dashboard.DashboardResponseModels;
+import com.smartfactory.mes.simulation.dto.equipment.EquipmentResponseModels;
+import com.smartfactory.mes.simulation.dto.line.LineResponseModels;
 import com.smartfactory.mes.simulation.service.SimulationTickModels.SimulationTickResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,14 +26,16 @@ import java.util.Map;
 @ConditionalOnProperty(prefix = "spring.datasource", name = "url")
 public class SimulationRealtimeSnapshotService {
 
-    private final SimulationQueryService simulationQueryService;
+    private final DashboardQueryService dashboardQueryService;
+    private final LineQueryService lineQueryService;
+    private final EquipmentQueryService equipmentQueryService;
 
     private DashboardCache dashboardCache;
     private final Map<Long, LineCache> lineCaches = new HashMap<>();
     private final Map<Long, EquipmentCache> equipmentCaches = new HashMap<>();
 
     public synchronized void initializeFromDatabase() {
-        DashboardResponseModels.DashboardSnapshotResponse dashboard = simulationQueryService.getDashboardSnapshot();
+        DashboardResponseModels.DashboardSnapshotResponse dashboard = dashboardQueryService.getDashboardSnapshot();
 
         long totalSecondsToday = Math.max(1L, Duration.between(
                 dashboard.generatedAt().toLocalDate().atStartOfDay(),
@@ -50,7 +52,7 @@ public class SimulationRealtimeSnapshotService {
         equipmentCaches.clear();
 
         for (DashboardResponseModels.LineStatusResponse lineSummary : dashboard.lines()) {
-            LineResponseModels.LineDetailResponse lineDetail = simulationQueryService.getLineDetail(lineSummary.lineId());
+            LineResponseModels.LineDetailResponse lineDetail = lineQueryService.getLineDetail(lineSummary.lineId());
 
             LineCache lineCache = new LineCache();
             lineCache.lineId = lineDetail.lineId();
@@ -70,7 +72,7 @@ public class SimulationRealtimeSnapshotService {
 
             for (LineResponseModels.LineEquipmentResponse equipmentSummary : lineDetail.equipments()) {
                 EquipmentResponseModels.EquipmentDetailResponse equipmentDetail =
-                        simulationQueryService.getEquipmentDetail(equipmentSummary.equipmentId());
+                        equipmentQueryService.getEquipmentDetail(equipmentSummary.equipmentId());
 
                 EquipmentCache equipmentCache = new EquipmentCache();
                 equipmentCache.equipmentId = equipmentDetail.equipmentId();
@@ -195,7 +197,7 @@ public class SimulationRealtimeSnapshotService {
 
     public synchronized DashboardResponseModels.DashboardSnapshotResponse getDashboardSnapshot() {
         if (dashboardCache == null) {
-            return simulationQueryService.getDashboardSnapshot();
+            return dashboardQueryService.getDashboardSnapshot();
         }
 
         List<DashboardResponseModels.LineStatusResponse> lineResponses = lineCaches.values().stream()
@@ -235,7 +237,7 @@ public class SimulationRealtimeSnapshotService {
 
     public synchronized LineResponseModels.LineDetailResponse getLineDetail(Long lineId) {
         if (dashboardCache == null) {
-            return simulationQueryService.getLineDetail(lineId);
+            return lineQueryService.getLineDetail(lineId);
         }
 
         LineCache lineCache = lineCaches.get(lineId);
@@ -287,7 +289,7 @@ public class SimulationRealtimeSnapshotService {
 
     public synchronized EquipmentResponseModels.EquipmentDetailResponse getEquipmentDetail(Long equipmentId) {
         if (dashboardCache == null) {
-            return simulationQueryService.getEquipmentDetail(equipmentId);
+            return equipmentQueryService.getEquipmentDetail(equipmentId);
         }
 
         EquipmentCache equipmentCache = equipmentCaches.get(equipmentId);

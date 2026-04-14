@@ -3,7 +3,7 @@ package com.smartfactory.mes.simulation.service;
 import com.smartfactory.mes.simulation.domain.AlarmHistory;
 import com.smartfactory.mes.simulation.domain.EquipmentRuntimeState;
 import com.smartfactory.mes.simulation.domain.ProductionRecord;
-import com.smartfactory.mes.simulation.domain.element.EquipmentStatus;
+import com.smartfactory.mes.simulation.domain.enums.EquipmentStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
