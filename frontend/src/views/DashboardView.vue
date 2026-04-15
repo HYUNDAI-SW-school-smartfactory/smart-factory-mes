@@ -1,7 +1,7 @@
 <template>
   <main class="page-shell">
     <div class="page-container">
-      <DashboardHeader />
+      <DashboardHeader :alarms="dashboard.alarms" />
 
       <section class="kpi-grid">
         <KpiCard title="Total Production" :value="dashboard.kpis.totalProduction.toLocaleString()" unit="units" trend="up" trend-value="Realtime" icon-label="PRD" />
@@ -21,7 +21,6 @@
         </div>
         <div class="dashboard-grid__side">
           <EquipmentSummary :summary="dashboard.summary" />
-          <AlarmList :alarms="dashboard.alarms" :max-items="4" />
         </div>
       </section>
     </div>
@@ -30,7 +29,6 @@
 
 <script setup>
 import { onBeforeUnmount, ref } from 'vue'
-import AlarmList from '@/components/dashboard/AlarmList.vue'
 import DashboardHeader from '@/components/dashboard/DashboardHeader.vue'
 import EquipmentSummary from '@/components/dashboard/EquipmentSummary.vue'
 import KpiCard from '@/components/dashboard/KpiCard.vue'

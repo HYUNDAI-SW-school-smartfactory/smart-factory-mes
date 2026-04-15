@@ -30,7 +30,7 @@ public class SimulationProfileFactory {
                 .baseUph(resolveBaseUph(equipmentType, equipment.getProcessOrder()))
                 .failureBias(resolveFailureBias(equipmentType))
                 .defectBias(resolveDefectBias(equipmentType))
-                .minRunTicks(16 + ((equipment.getProcessOrder() == null ? 1 : equipment.getProcessOrder()) * 3))
+                .minRunTicks(10 + ((equipment.getProcessOrder() == null ? 1 : equipment.getProcessOrder()) * 2))
                 .minStopTicks(8 + (equipment.getProcessOrder() == null ? 0 : equipment.getProcessOrder() % 3))
                 .minIdleTicks(4)
                 .minMaintenanceTicks(24)
@@ -61,15 +61,15 @@ public class SimulationProfileFactory {
 
     private double resolveFailureBias(EquipmentType equipmentType) {
         return switch (equipmentType) {
-            case COIL -> 0.0024;
-            case PRESS -> 0.0032;
-            case TRIM -> 0.0036;
-            case ROBOT -> 0.0026;
-            case CONVEYOR -> 0.0024;
-            case PACKER -> 0.0020;
-            case LABELER -> 0.0020;
-            case PALLETIZER -> 0.0020;
-            case INSPECTOR -> 0.0018;
+            case COIL -> 0.0042;
+            case PRESS -> 0.0054;
+            case TRIM -> 0.0060;
+            case ROBOT -> 0.0045;
+            case CONVEYOR -> 0.0038;
+            case PACKER -> 0.0032;
+            case LABELER -> 0.0032;
+            case PALLETIZER -> 0.0030;
+            case INSPECTOR -> 0.0034;
         };
     }
 

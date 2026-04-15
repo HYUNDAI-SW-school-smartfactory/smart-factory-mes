@@ -155,8 +155,9 @@
 
 .dashboard-header__user {
   display: grid;
-  justify-items: end;
+  justify-items: start;
   gap: 2px;
+  margin-right: 6px;
 }
 
 .dashboard-header__welcome {
@@ -217,6 +218,150 @@
 .icon-button:hover {
   background: var(--secondary-hover);
   border-color: rgba(55, 214, 122, 0.32);
+}
+
+.dashboard-header__alarm-box {
+  position: relative;
+}
+
+.dashboard-header__alarm-button {
+  position: relative;
+}
+
+.dashboard-header__alarm-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.dashboard-header__alarm-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 18px;
+}
+
+.dashboard-header__alarm-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 20;
+  width: min(380px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 18px;
+  background: rgba(10, 16, 24, 0.98);
+  box-shadow: var(--shadow);
+}
+
+.dashboard-header__alarm-panel-header,
+.dashboard-header__alarm-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-header__alarm-panel-header {
+  margin-bottom: 12px;
+}
+
+.dashboard-header__alarm-panel-header h2 {
+  margin: 0;
+  font-size: 0.94rem;
+}
+
+.dashboard-header__alarm-panel-header span,
+.dashboard-header__alarm-entry-header span,
+.dashboard-header__alarm-entry small {
+  color: var(--muted-foreground);
+}
+
+.dashboard-header__alarm-list {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-header__alarm-entry {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(19, 28, 39, 0.92);
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dashboard-header__alarm-entry:hover,
+.alarm-item--clickable:hover {
+  transform: translateY(-1px);
+}
+
+.dashboard-header__alarm-entry--read {
+  opacity: 0.68;
+}
+
+.dashboard-header__alarm-entry:hover {
+  border-color: rgba(55, 214, 122, 0.32);
+  background: rgba(24, 35, 49, 0.94);
+}
+
+.dashboard-header__alarm-entry-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: rgba(143, 160, 181, 0.4);
+}
+
+.dashboard-header__alarm-entry-dot--critical {
+  background: var(--danger);
+}
+
+.dashboard-header__alarm-entry-dot--warning {
+  background: var(--warning);
+}
+
+.dashboard-header__alarm-entry-dot--info {
+  background: #61a5ff;
+}
+
+.dashboard-header__alarm-entry-body p,
+.dashboard-header__alarm-empty {
+  margin: 4px 0 0;
+}
+
+.dashboard-header__alarm-entry-body p {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.dashboard-header__alarm-entry-body small {
+  display: block;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.dashboard-header__alarm-empty {
+  padding: 12px 2px 2px;
+  font-size: 0.84rem;
 }
 
 .detail-header {
@@ -598,6 +743,11 @@ tbody tr + tr {
   padding: 14px;
   border-left: 3px solid transparent;
   border-radius: var(--radius-md);
+}
+
+.alarm-item--clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .alarm-item--critical {
@@ -1020,6 +1170,191 @@ tbody tr + tr {
   margin: 10px 0 18px;
 }
 
+.global-alarm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at center, rgba(255, 82, 82, 0.16), transparent 42%),
+    rgba(4, 8, 12, 0.74);
+  backdrop-filter: blur(8px);
+}
+
+.global-alarm-modal {
+  position: relative;
+  width: min(680px, 100%);
+  padding: 0 28px 28px;
+  border: 1px solid rgba(255, 107, 107, 0.42);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 107, 107, 0.24), transparent 34%),
+    radial-gradient(circle at top left, rgba(255, 190, 92, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(25, 15, 19, 0.99), rgba(14, 17, 25, 0.99));
+  box-shadow: 0 34px 76px rgba(0, 0, 0, 0.42);
+  overflow: hidden;
+  animation: alarmModalPulse 1.1s ease-in-out infinite alternate;
+}
+
+.global-alarm-modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 18%,
+    transparent 82%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  pointer-events: none;
+}
+
+.global-alarm-modal__eyebrow,
+.global-alarm-modal__actions {
+  display: flex;
+  align-items: center;
+}
+
+.global-alarm-modal__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 -28px 18px;
+  padding: 12px 28px;
+  background: linear-gradient(90deg, rgba(255, 84, 84, 0.92), rgba(255, 124, 92, 0.92));
+  color: #fff7f7;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.global-alarm-modal__eyebrow {
+  gap: 10px;
+  margin-bottom: 14px;
+  color: #ffd5d5;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.global-alarm-modal__eyebrow-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 107, 107, 0.26);
+  color: #ff6b6b;
+  box-shadow: 0 0 0 8px rgba(255, 107, 107, 0.08);
+  animation: alarmBadgeBlink 0.85s ease-in-out infinite;
+}
+
+.global-alarm-modal__title {
+  margin: 0;
+  font-size: 2.2rem;
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+}
+
+.global-alarm-modal__instruction {
+  margin: 12px 0 0;
+  color: #ffb3b3;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.global-alarm-modal__message {
+  margin: 14px 0 0;
+  color: #eef4fb;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.global-alarm-modal__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.global-alarm-modal__meta > div {
+  padding: 14px;
+  border: 1px solid rgba(255, 107, 107, 0.16);
+  border-radius: 16px;
+  background: rgba(18, 25, 36, 0.82);
+}
+
+.global-alarm-modal__label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted-foreground);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.global-alarm-modal__actions {
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.global-alarm-modal__button {
+  min-width: 136px;
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.global-alarm-modal__button:hover {
+  transform: translateY(-1px);
+}
+
+.global-alarm-modal__button--ghost {
+  border: 1px solid var(--border-strong);
+  background: rgba(16, 24, 34, 0.86);
+  color: var(--foreground);
+}
+
+.global-alarm-modal__button--primary {
+  border: 0;
+  background: linear-gradient(90deg, #ff8b8b, #ff6363);
+  color: #ffffff;
+}
+
+@keyframes alarmBadgeBlink {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(255, 107, 107, 0.08);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 12px rgba(255, 107, 107, 0.14);
+  }
+}
+
+@keyframes alarmModalPulse {
+  0% {
+    border-color: rgba(255, 107, 107, 0.36);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.38);
+  }
+  100% {
+    border-color: rgba(255, 124, 92, 0.64);
+    box-shadow: 0 38px 88px rgba(0, 0, 0, 0.48);
+  }
+}
+
 @keyframes pulse {
   0%,
   100% {
@@ -1100,5 +1435,29 @@ tbody tr + tr {
   .auth-card__footer {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .global-alarm-modal {
+    padding: 0 18px 22px;
+  }
+
+  .global-alarm-modal__title {
+    font-size: 1.55rem;
+  }
+
+  .global-alarm-modal__topbar {
+    margin-left: -18px;
+    margin-right: -18px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .global-alarm-modal__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .global-alarm-modal__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
   }
 }
