@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Delete;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,9 @@ public interface ProductionRecordMapper {
             )
             """)
     void insert(ProductionRecord record);
+
+    @Delete("DELETE FROM production_records")
+    void deleteAll();
 
     @Select("""
             SELECT record_id, line_id, equipment_id, record_time, production_count,

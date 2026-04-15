@@ -85,6 +85,15 @@ public class SimulationPersistenceService {
         tickResult.alarms().forEach(alarmHistoryMapper::insert);
     }
 
+    @Transactional
+    public void resetSimulationData() {
+        alarmHistoryMapper.deleteAll();
+        equipmentStatusHistoryMapper.deleteAll();
+        productionRecordMapper.deleteAll();
+        equipmentMapper.deleteAll();
+        productionLineMapper.deleteAll();
+    }
+
     public long countLines() {
         return productionLineMapper.countAll();
     }
