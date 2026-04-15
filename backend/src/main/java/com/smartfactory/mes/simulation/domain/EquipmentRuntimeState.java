@@ -23,6 +23,7 @@ public class EquipmentRuntimeState {
     private String equipmentName;
     private EquipmentType equipmentType;
     private EquipmentStatus currentStatus;
+    private int processOrder;
     private int baseUph;
     private double failureBias;
     private double defectBias;
@@ -32,6 +33,7 @@ public class EquipmentRuntimeState {
     private int minMaintenanceTicks;
     private int ticksInCurrentStatus;
     private double productionCarry;
+    private boolean blockedByUpstream;
     private LocalDateTime statusStartedAt;
     private LocalDateTime lastStatusChangedAt;
     private LocalDateTime lastInspectionAt;
@@ -44,6 +46,7 @@ public class EquipmentRuntimeState {
                 .equipmentName(equipmentName)
                 .equipmentType(equipmentType)
                 .currentStatus(currentStatus)
+                .processOrder(processOrder)
                 .baseUph(baseUph)
                 .failureBias(failureBias)
                 .defectBias(defectBias)
@@ -53,6 +56,7 @@ public class EquipmentRuntimeState {
                 .minMaintenanceTicks(minMaintenanceTicks)
                 .ticksInCurrentStatus(ticksInCurrentStatus)
                 .productionCarry(productionCarry)
+                .blockedByUpstream(blockedByUpstream)
                 .statusStartedAt(statusStartedAt)
                 .lastStatusChangedAt(lastStatusChangedAt)
                 .lastInspectionAt(lastInspectionAt)

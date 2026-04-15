@@ -86,6 +86,7 @@ public class LineQueryService {
                             equipment.getEquipmentCode(),
                             equipment.getEquipmentName(),
                             equipment.getEquipmentType(),
+                            equipment.getProcessOrder(),
                             equipment.getCurrentStatus(),
                             equipmentProduction,
                             latestUph,

@@ -161,7 +161,10 @@ function mapLinePayload(payload) {
     equipments: (payload.equipments ?? []).map((equipment) => ({
       id: equipment.equipmentId,
       lineId: payload.lineId,
+      code: equipment.equipmentCode,
       name: equipment.equipmentName,
+      type: equipment.equipmentType,
+      processOrder: equipment.processOrder,
       status: equipment.currentStatus,
       production: equipment.production,
       uph: equipment.uph,

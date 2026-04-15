@@ -39,6 +39,7 @@ public final class LineResponseModels {
             String equipmentCode,
             String equipmentName,
             String equipmentType,
+            int processOrder,
             String currentStatus,
             int production,
             int uph,

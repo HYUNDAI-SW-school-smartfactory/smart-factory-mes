@@ -64,6 +64,13 @@
       </section>
     </div>
   </main>
+  <main v-else-if="isLoading" class="page-shell page-shell--centered">
+    <div class="page-container page-container--tiny">
+      <p class="not-found__eyebrow">Loading</p>
+      <h1 class="not-found__title">Preparing equipment view...</h1>
+      <p class="not-found__text">Live equipment status is on the way.</p>
+    </div>
+  </main>
   <main v-else class="page-shell page-shell--centered">
     <div class="page-container page-container--tiny">
       <h1 class="not-found__title">{{ errorMessage || 'Equipment not found' }}</h1>
@@ -85,6 +92,7 @@ const route = useRoute()
 const item = ref(null)
 const equipmentAlarms = ref([])
 const errorMessage = ref('')
+const isLoading = ref(true)
 let disconnect = () => {}
 
 const uptimeVariant = computed(() => {
@@ -101,15 +109,18 @@ watch(
     item.value = null
     equipmentAlarms.value = []
     errorMessage.value = ''
+    isLoading.value = true
 
     disconnect = connectEquipmentStream(equipmentId, {
       onData: (payload) => {
         item.value = payload.item
         equipmentAlarms.value = payload.alarms
+        isLoading.value = false
       },
       onError: (error) => {
         errorMessage.value = error.message
         item.value = null
+        isLoading.value = false
       },
     })
   },

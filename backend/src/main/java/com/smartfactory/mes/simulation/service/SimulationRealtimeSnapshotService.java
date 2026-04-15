@@ -351,6 +351,7 @@ public class SimulationRealtimeSnapshotService {
                 equipmentCache.equipmentCode,
                 equipmentCache.equipmentName,
                 equipmentCache.equipmentType,
+                equipmentCache.processOrder,
                 equipmentCache.currentStatus,
                 equipmentCache.production,
                 equipmentCache.uph,

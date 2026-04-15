@@ -17,7 +17,7 @@ public class SimulationProfileFactory {
         EquipmentStatus currentStatus = EquipmentStatus.valueOf(equipment.getCurrentStatus());
         LocalDateTime statusStartedAt = equipment.getLastStatusChangedAt() != null
                 ? equipment.getLastStatusChangedAt()
-                : LocalDateTime.now().minusMinutes(5L + equipment.getEquipmentId());
+                : LocalDateTime.now().minusMinutes(20L + equipment.getEquipmentId());
 
         return EquipmentRuntimeState.builder()
                 .equipmentId(equipment.getEquipmentId())
@@ -26,15 +26,17 @@ public class SimulationProfileFactory {
                 .equipmentName(equipment.getEquipmentName())
                 .equipmentType(equipmentType)
                 .currentStatus(currentStatus)
+                .processOrder(equipment.getProcessOrder() == null ? 0 : equipment.getProcessOrder())
                 .baseUph(resolveBaseUph(equipmentType, equipment.getProcessOrder()))
                 .failureBias(resolveFailureBias(equipmentType))
                 .defectBias(resolveDefectBias(equipmentType))
-                .minRunTicks(6 + (equipment.getProcessOrder() % 4))
-                .minStopTicks(2 + (equipment.getProcessOrder() % 3))
-                .minIdleTicks(2)
-                .minMaintenanceTicks(4)
+                .minRunTicks(16 + ((equipment.getProcessOrder() == null ? 1 : equipment.getProcessOrder()) * 3))
+                .minStopTicks(8 + (equipment.getProcessOrder() == null ? 0 : equipment.getProcessOrder() % 3))
+                .minIdleTicks(4)
+                .minMaintenanceTicks(24)
                 .ticksInCurrentStatus(resolveTicksInCurrentStatus(statusStartedAt))
                 .productionCarry(0.0)
+                .blockedByUpstream(false)
                 .statusStartedAt(statusStartedAt)
                 .lastStatusChangedAt(statusStartedAt)
                 .lastInspectionAt(equipment.getLastInspectionAt())
@@ -42,39 +44,46 @@ public class SimulationProfileFactory {
     }
 
     private int resolveBaseUph(EquipmentType equipmentType, Integer processOrder) {
-        int step = processOrder == null ? 0 : processOrder * 8;
+        int order = processOrder == null ? 1 : processOrder;
 
         return switch (equipmentType) {
-            case COIL -> 340 + step;
-            case PRESS -> 420 + step;
-            case ROBOT -> 380 + step;
-            case CONVEYOR -> 360 + step;
-            case PACKER -> 300 + step;
-            case LABELER -> 280 + step;
-            case PALLETIZER -> 250 + step;
-            case INSPECTOR -> 220 + step;
+            case COIL -> 540 - (order * 8);
+            case PRESS -> 500 - (order * 6);
+            case TRIM -> 470;
+            case ROBOT -> 455;
+            case CONVEYOR -> 420;
+            case PACKER -> 300;
+            case LABELER -> 280;
+            case PALLETIZER -> 250;
+            case INSPECTOR -> 390;
         };
     }
 
     private double resolveFailureBias(EquipmentType equipmentType) {
         return switch (equipmentType) {
-            case COIL -> 0.035;
-            case PRESS -> 0.030;
-            case ROBOT -> 0.028;
-            case CONVEYOR -> 0.040;
-            case PACKER -> 0.033;
-            case LABELER -> 0.025;
-            case PALLETIZER -> 0.022;
-            case INSPECTOR -> 0.020;
+            case COIL -> 0.0024;
+            case PRESS -> 0.0032;
+            case TRIM -> 0.0036;
+            case ROBOT -> 0.0026;
+            case CONVEYOR -> 0.0024;
+            case PACKER -> 0.0020;
+            case LABELER -> 0.0020;
+            case PALLETIZER -> 0.0020;
+            case INSPECTOR -> 0.0018;
         };
     }
 
     private double resolveDefectBias(EquipmentType equipmentType) {
         return switch (equipmentType) {
-            case COIL, PRESS -> 0.012;
-            case ROBOT, CONVEYOR -> 0.010;
-            case PACKER, LABELER -> 0.008;
-            case PALLETIZER, INSPECTOR -> 0.006;
+            case COIL -> 0.004;
+            case PRESS -> 0.012;
+            case TRIM -> 0.010;
+            case ROBOT -> 0.004;
+            case CONVEYOR -> 0.003;
+            case PACKER -> 0.003;
+            case LABELER -> 0.003;
+            case PALLETIZER -> 0.002;
+            case INSPECTOR -> 0.006;
         };
     }
 

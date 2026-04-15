@@ -73,7 +73,7 @@ public class SimulationDataInitializer implements ApplicationRunner {
     }
 
     private List<ProductionLine> buildLines() {
-        LocalDateTime now = LocalDateTime.now().minusMinutes(20);
+        LocalDateTime now = LocalDateTime.now().minusMinutes(40);
         List<ProductionLine> lines = new ArrayList<>();
 
         lines.add(ProductionLine.builder()
@@ -116,29 +116,79 @@ public class SimulationDataInitializer implements ApplicationRunner {
         return lines;
     }
 
+    private ProductionLine buildLine(
+            Long lineId,
+            String lineCode,
+            String lineName,
+            String productName,
+            int targetProduction,
+            String location,
+            LocalDateTime createdAt
+    ) {
+        return ProductionLine.builder()
+                .lineId(lineId)
+                .lineCode(lineCode)
+                .lineName(lineName)
+                .productName(productName)
+                .currentStatus(EquipmentStatus.RUN.name())
+                .targetProduction(targetProduction)
+                .location(location)
+                .isActive(true)
+                .createdAt(createdAt)
+                .updatedAt(createdAt)
+                .build();
+    }
+
     private List<Equipment> buildEquipments() {
         LocalDateTime now = LocalDateTime.now();
         List<Equipment> equipments = new ArrayList<>();
 
-        equipments.add(buildEquipment(1L, 1L, "EQ-101", "Coil Feeder 1", EquipmentType.COIL, EquipmentStatus.RUN, 1, now.minusMinutes(19), now.minusDays(3)));
-        equipments.add(buildEquipment(2L, 1L, "EQ-102", "Press Machine 1", EquipmentType.PRESS, EquipmentStatus.RUN, 2, now.minusMinutes(18), now.minusDays(2)));
-        equipments.add(buildEquipment(3L, 1L, "EQ-103", "Press Machine 2", EquipmentType.PRESS, EquipmentStatus.RUN, 3, now.minusMinutes(17), now.minusDays(4)));
-        equipments.add(buildEquipment(4L, 1L, "EQ-104", "Transfer Robot 1", EquipmentType.ROBOT, EquipmentStatus.RUN, 4, now.minusMinutes(16), now.minusDays(2)));
-        equipments.add(buildEquipment(5L, 1L, "EQ-105", "Vision Inspector 1", EquipmentType.INSPECTOR, EquipmentStatus.IDLE, 5, now.minusMinutes(7), now.minusDays(1)));
-
-        equipments.add(buildEquipment(6L, 2L, "EQ-201", "Loader Robot 1", EquipmentType.ROBOT, EquipmentStatus.RUN, 1, now.minusMinutes(15), now.minusDays(2)));
-        equipments.add(buildEquipment(7L, 2L, "EQ-202", "Assembly Robot 1", EquipmentType.ROBOT, EquipmentStatus.RUN, 2, now.minusMinutes(14), now.minusDays(3)));
-        equipments.add(buildEquipment(8L, 2L, "EQ-203", "Assembly Robot 2", EquipmentType.ROBOT, EquipmentStatus.RUN, 3, now.minusMinutes(13), now.minusDays(4)));
-        equipments.add(buildEquipment(9L, 2L, "EQ-204", "Torque Conveyor 1", EquipmentType.CONVEYOR, EquipmentStatus.RUN, 4, now.minusMinutes(12), now.minusDays(5)));
-        equipments.add(buildEquipment(10L, 2L, "EQ-205", "Final Inspector 1", EquipmentType.INSPECTOR, EquipmentStatus.RUN, 5, now.minusMinutes(11), now.minusDays(1)));
-
-        equipments.add(buildEquipment(11L, 3L, "EQ-301", "Case Packer 1", EquipmentType.PACKER, EquipmentStatus.RUN, 1, now.minusMinutes(10), now.minusDays(2)));
-        equipments.add(buildEquipment(12L, 3L, "EQ-302", "Labeler 1", EquipmentType.LABELER, EquipmentStatus.RUN, 2, now.minusMinutes(9), now.minusDays(2)));
-        equipments.add(buildEquipment(13L, 3L, "EQ-303", "Seal Conveyor 1", EquipmentType.CONVEYOR, EquipmentStatus.RUN, 3, now.minusMinutes(8), now.minusDays(3)));
-        equipments.add(buildEquipment(14L, 3L, "EQ-304", "Palletizer 1", EquipmentType.PALLETIZER, EquipmentStatus.IDLE, 4, now.minusMinutes(6), now.minusDays(4)));
-        equipments.add(buildEquipment(15L, 3L, "EQ-305", "Final Inspector 2", EquipmentType.INSPECTOR, EquipmentStatus.RUN, 5, now.minusMinutes(5), now.minusDays(1)));
+        buildPressLineEquipments(
+                equipments,
+                1L,
+                100L,
+                "DOOR",
+                now.minusMinutes(32)
+        );
+        buildPressLineEquipments(
+                equipments,
+                2L,
+                200L,
+                "LOOP",
+                now.minusMinutes(28)
+        );
+        buildPressLineEquipments(
+                equipments,
+                3L,
+                300L,
+                "TRUNK",
+                now.minusMinutes(24)
+        );
+        buildPressLineEquipments(
+                equipments,
+                4L,
+                400L,
+                "HOOD",
+                now.minusMinutes(20)
+        );
 
         return equipments;
+    }
+
+    private void buildPressLineEquipments(
+            List<Equipment> equipments,
+            Long lineId,
+            Long baseEquipmentId,
+            String lineCodePrefix,
+            LocalDateTime baseTime
+    ) {
+        equipments.add(buildEquipment(baseEquipmentId + 1, lineId, "EQ-" + lineCodePrefix + "-01", "Coil Feeder", EquipmentType.COIL, 1, baseTime.plusMinutes(1), baseTime.minusDays(2)));
+        equipments.add(buildEquipment(baseEquipmentId + 2, lineId, "EQ-" + lineCodePrefix + "-02", "Press Machine 1", EquipmentType.PRESS, 2, baseTime.plusMinutes(2), baseTime.minusDays(2)));
+        equipments.add(buildEquipment(baseEquipmentId + 3, lineId, "EQ-" + lineCodePrefix + "-03", "Press Machine 2", EquipmentType.PRESS, 3, baseTime.plusMinutes(3), baseTime.minusDays(3)));
+        equipments.add(buildEquipment(baseEquipmentId + 4, lineId, "EQ-" + lineCodePrefix + "-04", "Press Machine 3", EquipmentType.PRESS, 4, baseTime.plusMinutes(4), baseTime.minusDays(3)));
+        equipments.add(buildEquipment(baseEquipmentId + 5, lineId, "EQ-" + lineCodePrefix + "-05", "Trim Machine", EquipmentType.TRIM, 5, baseTime.plusMinutes(5), baseTime.minusDays(4)));
+        equipments.add(buildEquipment(baseEquipmentId + 6, lineId, "EQ-" + lineCodePrefix + "-06", "Vision Inspector", EquipmentType.INSPECTOR, 6, baseTime.plusMinutes(6), baseTime.minusDays(1)));
+        equipments.add(buildEquipment(baseEquipmentId + 7, lineId, "EQ-" + lineCodePrefix + "-07", "Transfer Robot", EquipmentType.ROBOT, 7, baseTime.plusMinutes(7), baseTime.minusDays(2)));
     }
 
     private Equipment buildEquipment(
@@ -147,7 +197,6 @@ public class SimulationDataInitializer implements ApplicationRunner {
             String equipmentCode,
             String equipmentName,
             EquipmentType equipmentType,
-            EquipmentStatus currentStatus,
             int processOrder,
             LocalDateTime lastStatusChangedAt,
             LocalDateTime lastInspectionAt
@@ -158,12 +207,12 @@ public class SimulationDataInitializer implements ApplicationRunner {
                 .equipmentCode(equipmentCode)
                 .equipmentName(equipmentName)
                 .equipmentType(equipmentType.name())
-                .currentStatus(currentStatus.name())
+                .currentStatus(EquipmentStatus.RUN.name())
                 .processOrder(processOrder)
                 .lastStatusChangedAt(lastStatusChangedAt)
                 .lastInspectionAt(lastInspectionAt)
                 .isActive(true)
-                .createdAt(lastStatusChangedAt.minusMinutes(30))
+                .createdAt(lastStatusChangedAt.minusMinutes(50))
                 .updatedAt(lastStatusChangedAt)
                 .build();
     }
