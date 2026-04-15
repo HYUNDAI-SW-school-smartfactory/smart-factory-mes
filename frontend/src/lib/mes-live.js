@@ -202,6 +202,7 @@ function mapAlarms(alarms = []) {
     lineName: alarm.lineName,
     equipmentId: alarm.equipmentId,
     equipmentName: alarm.equipmentName ?? '-',
+    alarmType: alarm.alarmType,
     message: alarm.message,
     severity: mapSeverity(alarm.severity),
   }))
