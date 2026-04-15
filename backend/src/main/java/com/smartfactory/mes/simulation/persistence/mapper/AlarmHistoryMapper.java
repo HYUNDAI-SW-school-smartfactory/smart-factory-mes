@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Delete;
 
 import java.util.List;
 
@@ -50,4 +51,7 @@ public interface AlarmHistoryMapper {
             LIMIT 20
             """)
     List<AlarmHistory> selectRecentByEquipmentId(@Param("equipmentId") Long equipmentId);
+
+    @Delete("DELETE FROM alarm_histories")
+    void deleteAll();
 }

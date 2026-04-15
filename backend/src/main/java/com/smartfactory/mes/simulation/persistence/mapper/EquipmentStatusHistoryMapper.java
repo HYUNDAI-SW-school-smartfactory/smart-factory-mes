@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
@@ -50,4 +51,7 @@ public interface EquipmentStatusHistoryMapper {
             WHERE equipment_id = #{equipmentId} AND ended_at IS NULL
             """)
     long countOpenHistory(@Param("equipmentId") Long equipmentId);
+
+    @Delete("DELETE FROM equipment_status_history")
+    void deleteAll();
 }

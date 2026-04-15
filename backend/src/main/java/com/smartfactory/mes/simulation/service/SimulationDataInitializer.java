@@ -7,6 +7,7 @@ import com.smartfactory.mes.simulation.domain.ProductionLine;
 import com.smartfactory.mes.simulation.domain.enums.EquipmentStatus;
 import com.smartfactory.mes.simulation.domain.enums.EquipmentType;
 import com.smartfactory.mes.simulation.persistence.mapper.EquipmentMapper;
+import com.smartfactory.mes.simulation.persistence.mapper.ProductionLineMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -15,7 +16,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ import java.util.List;
 public class SimulationDataInitializer implements ApplicationRunner {
 
     private final EquipmentMapper equipmentMapper;
+    private final ProductionLineMapper productionLineMapper;
     private final SimulationPersistenceService simulationPersistenceService;
     private final SimulationProfileFactory simulationProfileFactory;
     private final SimulationStateStore simulationStateStore;
@@ -33,12 +38,24 @@ public class SimulationDataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (simulationPersistenceService.countLines() == 0) {
-            simulationPersistenceService.seedLines(buildLines());
-        }
+        List<ProductionLine> expectedLines = buildLines();
+        List<Equipment> expectedEquipments = buildEquipments();
 
-        if (simulationPersistenceService.countEquipments() == 0) {
-            simulationPersistenceService.seedEquipments(buildEquipments());
+        List<ProductionLine> currentLines = productionLineMapper.selectActiveLines();
+        List<Equipment> currentEquipments = equipmentMapper.selectActiveEquipments();
+
+        if (requiresReseed(currentLines, currentEquipments, expectedLines, expectedEquipments)) {
+            simulationPersistenceService.resetSimulationData();
+            simulationPersistenceService.seedLines(expectedLines);
+            simulationPersistenceService.seedEquipments(expectedEquipments);
+        } else {
+            if (currentLines.isEmpty()) {
+                simulationPersistenceService.seedLines(expectedLines);
+            }
+
+            if (currentEquipments.isEmpty()) {
+                simulationPersistenceService.seedEquipments(expectedEquipments);
+            }
         }
 
         List<Equipment> equipments = equipmentMapper.selectActiveEquipments();
@@ -61,6 +78,42 @@ public class SimulationDataInitializer implements ApplicationRunner {
         simulationStateStore.markReady();
     }
 
+    private boolean requiresReseed(
+            List<ProductionLine> currentLines,
+            List<Equipment> currentEquipments,
+            List<ProductionLine> expectedLines,
+            List<Equipment> expectedEquipments
+    ) {
+        if (currentLines.isEmpty() && currentEquipments.isEmpty()) {
+            return false;
+        }
+
+        if (currentLines.size() != expectedLines.size() || currentEquipments.size() != expectedEquipments.size()) {
+            return true;
+        }
+
+        Set<String> currentLineCodes = currentLines.stream()
+                .sorted(Comparator.comparing(ProductionLine::getLineId))
+                .map(ProductionLine::getLineCode)
+                .collect(Collectors.toSet());
+        Set<String> expectedLineCodes = expectedLines.stream()
+                .map(ProductionLine::getLineCode)
+                .collect(Collectors.toSet());
+
+        if (!currentLineCodes.equals(expectedLineCodes)) {
+            return true;
+        }
+
+        Set<String> currentEquipmentCodes = currentEquipments.stream()
+                .map(Equipment::getEquipmentCode)
+                .collect(Collectors.toSet());
+        Set<String> expectedEquipmentCodes = expectedEquipments.stream()
+                .map(Equipment::getEquipmentCode)
+                .collect(Collectors.toSet());
+
+        return !currentEquipmentCodes.equals(expectedEquipmentCodes);
+    }
+
     private void warmUpRecords() {
         LocalDateTime tickTime = LocalDateTime.now().minusSeconds((long) simulationProperties.getBootstrapTicks() * 5L);
 
@@ -74,46 +127,12 @@ public class SimulationDataInitializer implements ApplicationRunner {
 
     private List<ProductionLine> buildLines() {
         LocalDateTime now = LocalDateTime.now().minusMinutes(40);
-        List<ProductionLine> lines = new ArrayList<>();
-
-        lines.add(ProductionLine.builder()
-                .lineId(1L)
-                .lineCode("LINE-PRESS-01")
-                .lineName("Roof Panel Line 1")
-                .productName("Brake Pad Plate")
-                .currentStatus(EquipmentStatus.RUN.name())
-                .targetProduction(6400)
-                .location("Plant A - Zone 1")
-                .isActive(true)
-                .createdAt(now)
-                .updatedAt(now)
-                .build());
-        lines.add(ProductionLine.builder()
-                .lineId(2L)
-                .lineCode("LINE-ASM-01")
-                .lineName("Trunk Panel Line 1")
-                .productName("Control Module")
-                .currentStatus(EquipmentStatus.RUN.name())
-                .targetProduction(5200)
-                .location("Plant A - Zone 2")
-                .isActive(true)
-                .createdAt(now)
-                .updatedAt(now)
-                .build());
-        lines.add(ProductionLine.builder()
-                .lineId(3L)
-                .lineCode("LINE-PACK-01")
-                .lineName("Front Left Door Panel Line 1")
-                .productName("Finished Goods Pack")
-                .currentStatus(EquipmentStatus.RUN.name())
-                .targetProduction(4800)
-                .location("Plant A - Zone 3")
-                .isActive(true)
-                .createdAt(now)
-                .updatedAt(now)
-                .build());
-
-        return lines;
+        return List.of(
+                buildLine(1L, "LINE-PRESS-DOOR", "Press - Door Line", "Door Outer Panel", 6400, "Press Shop - Bay 1", now),
+                buildLine(2L, "LINE-PRESS-LOOP", "Press - Loop Line", "Loop Reinforcement Panel", 6200, "Press Shop - Bay 2", now.plusMinutes(2)),
+                buildLine(3L, "LINE-PRESS-TRUNK", "Press - Trunk Line", "Trunk Lid Panel", 6100, "Press Shop - Bay 3", now.plusMinutes(4)),
+                buildLine(4L, "LINE-PRESS-HOOD", "Press - Hood Line", "Hood Outer Panel", 6300, "Press Shop - Bay 4", now.plusMinutes(6))
+        );
     }
 
     private ProductionLine buildLine(
