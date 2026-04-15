@@ -14,6 +14,7 @@ spring.sql.init.schema-locations=classpath:schema.sql
 spring.sql.init.continue-on-error=false
 
 mybatis.configuration.map-underscore-to-camel-case=true
+app.timezone=${APP_TIMEZONE:Asia/Seoul}
 app.cors.allowed-origin-patterns=${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,https://*.vercel.app}
 
 mes.simulation.enabled=${MES_SIMULATION_ENABLED:true}
